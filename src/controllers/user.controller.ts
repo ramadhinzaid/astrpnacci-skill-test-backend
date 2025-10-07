@@ -5,7 +5,8 @@ import { sendResponse } from '../utils/response.util';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await userService.getUsers();
+    const { page, limit, search } = req.query;
+    const users = await userService.getUsers(Number(page), Number(limit), search as string);
     sendResponse(res, 200, 'Users retrieved successfully', users);
   } catch (error) {
     sendResponse(res, 500, 'Error getting users');

@@ -1,21 +1,47 @@
+import * as admin from "firebase-admin";
+import { User } from "../models/user.model";
+import * as userService from "./user.service";
+import { uploadFile } from "./storage.service";
 
-import * as admin from 'firebase-admin';
-import { User } from '../models/user.model';
-import * as userService from './user.service';
+export const register = async (
+  name: string,
+  email: string,
+  password: string,
+  photo?: Express.Multer.File
+): Promise<
+  Omit<User, "password" | "created_at" | "updated_at"> | undefined
+> => {
+  let photoUrl = "";
+  if (photo) {
+    photoUrl = await uploadFile(photo);
+  }
 
-export const register = async (name: string, email: string, password: string, photo: string): Promise<Omit<User, 'password' | 'created_at' | 'updated_at'> | undefined> => {
   const userRecord = await admin.auth().createUser({
     email,
     password,
     displayName: name,
-    photoURL: photo,
+    photoURL: photoUrl,
   });
 
-  const user = await userService.createUser(userRecord.uid, name, email, photo);
+  const user = await userService.createUser(
+    userRecord.uid,
+    name,
+    email,
+    photoUrl
+  );
   return user;
 };
 
-export const login = async (email: string, password: string): Promise<{ user: Omit<User, 'password' | 'created_at' | 'updated_at'>, token: string } | undefined> => {
+export const login = async (
+  email: string,
+  password: string
+): Promise<
+  | {
+      user: Omit<User, "password" | "created_at" | "updated_at">;
+      token: string;
+    }
+  | undefined
+> => {
   try {
     const userRecord = await admin.auth().getUserByEmail(email);
     const token = await admin.auth().createCustomToken(userRecord.uid);
@@ -29,7 +55,10 @@ export const login = async (email: string, password: string): Promise<{ user: Om
   }
 };
 
-export const changePassword = async (email: string, newPassword: string): Promise<boolean> => {
+export const changePassword = async (
+  email: string,
+  newPassword: string
+): Promise<boolean> => {
   try {
     const user = await admin.auth().getUserByEmail(email);
     await admin.auth().updateUser(user.uid, { password: newPassword });
