@@ -5,11 +5,10 @@ import { sendResponse } from "../utils/response.util";
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
-    const photo = req.file;
     if (!name || !email || !password) {
       return sendResponse(res, 400, "Name, email, and password are required");
     }
-    const newUser = await authService.register(name, email, password, photo);
+    const newUser = await authService.register(name, email, password);
     sendResponse(res, 201, "User registered successfully", newUser);
   } catch (error) {
     console.error(error);

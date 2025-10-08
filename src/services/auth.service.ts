@@ -6,29 +6,17 @@ import { uploadFile } from "./storage.service";
 export const register = async (
   name: string,
   email: string,
-  password: string,
-  photo?: Express.Multer.File
+  password: string
 ): Promise<
   Omit<User, "password" | "created_at" | "updated_at"> | undefined
 > => {
-  let photoUrl = "";
-  if (photo) {
-    photoUrl = await uploadFile(photo);
-  }
-
   const userRecord = await admin.auth().createUser({
     email,
     password,
     displayName: name,
-    photoURL: photoUrl,
   });
 
-  const user = await userService.createUser(
-    userRecord.uid,
-    name,
-    email,
-    photoUrl
-  );
+  const user = await userService.createUser(userRecord.uid, name, email);
   return user;
 };
 

@@ -6,24 +6,22 @@ export const uploadFile = async (
 ): Promise<string> => {
   const bucket = getStorage().bucket(BUCKET_NAME);
   const result = bucket.file(Date.now() + "-" + file.originalname);
-  const publicURL = await getDownloadURL(result);
-  return publicURL;
-  // const blobStream = blob.createWriteStream({
-  //   metadata: {
-  //     contentType: file.mimetype,
-  //   },
-  // });
+  const blobStream = result.createWriteStream({
+    metadata: {
+      contentType: file.mimetype,
+    },
+  });
 
-  // return new Promise((resolve, reject) => {
-  //   blobStream.on('error', (err) => {
-  //     reject(err);
-  //   });
+  return new Promise((resolve, reject) => {
+    blobStream.on("error", (err) => {
+      reject(err);
+    });
 
-  //   blobStream.on('finish', () => {
-  //     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-  //     resolve(publicUrl);
-  //   });
+    blobStream.on("finish", async () => {
+      const publicUrl = await getDownloadURL(result);
+      resolve(publicUrl);
+    });
 
-  //   blobStream.end(file.buffer);
-  // });
+    blobStream.end(file.buffer);
+  });
 };
