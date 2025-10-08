@@ -35,11 +35,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
+    const { email, password } = req.body;
+    if (!email || !password) {
       return sendResponse(res, 400, "Email and new password are required");
     }
-    const success = await authService.changePassword(email, newPassword);
+    const success = await authService.changePassword(email, password);
     if (success) {
       sendResponse(res, 200, "Password changed successfully");
     } else {
